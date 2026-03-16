@@ -1,5 +1,6 @@
-package com.fintech.fintech_platform.domain.auth;
+package com.fintech.fintech_platform.global;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -8,10 +9,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtUtil jwtUtil;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -30,9 +35,13 @@ public class SecurityConfig {
 
         // URL 접근 권한 설정
         http.authorizeHttpRequests(auth -> {
-            auth.requestMatchers("/auth/**").permitAll(); // 회원가입, 로그인은 누구나
-            auth.anyRequest().authenticated();                     // 나머지는 로그인 필요
+            auth.requestMatchers("/auth/**").permitAll();
+            auth.anyRequest().authenticated();
         });
+
+        // JwtFilter 등록
+        http.addFilterBefore(new JwtFilter(jwtUtil),
+                UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
