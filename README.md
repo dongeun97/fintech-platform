@@ -1,13 +1,16 @@
 # 💰 Fintech Platform
 
->  계좌이제 동시성 제어 및 일병 정산 배치 금융 서비스
+> 계좌이체 동시성 제어 및 일별 정산 배치 금융 서비스
 
 ---
 
 ## 📌 프로젝트 개요
+
 금융권 실무 환경을 고려한 백엔드 서비스입니다.
 계좌이체 시 발생할 수 있는 동시성 문제를 Redis 분산락으로 해결하고,
 일별 거래 정산을 Spring Batch로 처리합니다.
+
+---
 
 ## 🛠 기술 스택
 
@@ -62,31 +65,30 @@
 - Docker Desktop
 
 ### 1. 저장소 클론
-\```bash
+```bash
 git clone https://github.com/dongeun97/fintech-platform.git
 cd fintech-platform
-\```
+```
 
 ### 2. 인프라 실행 (MySQL + Redis)
-\```bash
+```bash
 docker-compose up -d
-\```
+```
 
 ### 3. 애플리케이션 실행
-\```bash
+```bash
 ./gradlew bootRun
-\```
+```
 
 ### 4. API 확인
-\```
+```
 http://localhost:8080
-\```
+```
 
 ---
 
 ## 📂 프로젝트 구조
-
-\```
+```
 src/main/java/com/fintech/
 ├── domain/
 │   ├── account/       # 계좌이체 API (동시성 제어)
@@ -95,7 +97,7 @@ src/main/java/com/fintech/
 ├── global/
 │   ├── lock/          # Redis 분산락
 │   └── exception/     # 공통 예외 처리
-\```
+```
 
 ---
 
