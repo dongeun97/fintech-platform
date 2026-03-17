@@ -39,7 +39,8 @@
 - Spring Security 6.x 기반의 최신 보안 설정 적용
 
 ### Redis 분산락
-- 계좌이체 동시 요청 시 데이터 정합성 보장
+- 급여일에 회사 계좌에서 수백 명한테 동시에 급여를 이체하는 상황처럼 같은 계좌에서 동시에 여러 출금 요청이 발생할 수 있음
+- Redis 분산락으로 동시성 제어하여 잔액 정합성 보장
 - DB Lock 대비 성능 우수
 - 분산 환경에서도 동작 가능
 
@@ -66,53 +67,3 @@
 
 ### 1. 저장소 클론
 ```bash
-git clone https://github.com/dongeun97/fintech-platform.git
-cd fintech-platform
-```
-
-### 2. 인프라 실행 (MySQL + Redis)
-```bash
-docker-compose up -d
-```
-
-### 3. 애플리케이션 실행
-```bash
-./gradlew bootRun
-```
-
-### 4. API 확인
-```
-http://localhost:8080
-```
-
----
-
-## 📂 프로젝트 구조
-```
-src/main/java/com/fintech/
-├── domain/
-│   ├── account/       # 계좌이체 API (동시성 제어)
-│   ├── batch/         # 일별 정산 Spring Batch
-│   └── auth/          # JWT 인증
-├── global/
-│   ├── lock/          # Redis 분산락
-│   └── exception/     # 공통 예외 처리
-```
-
----
-
-## 📋 주요 기능
-
-### 1. 계좌이체 API
-- Redis 분산락을 활용한 동시성 제어
-- 트랜잭션 처리로 데이터 정합성 보장
-- 잔액 부족, 계좌 없음 등 예외 처리
-
-### 2. 일별 정산 배치
-- Spring Batch Chunk 방식으로 대용량 처리
-- 매일 자정 스케줄링 실행
-- 거래 내역 집계 및 정산 결과 저장
-
-### 3. JWT 인증
-- Access Token / Refresh Token 구조
-- Spring Security 필터 체인 적용
