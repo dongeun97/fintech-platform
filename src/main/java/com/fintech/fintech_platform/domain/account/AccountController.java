@@ -2,6 +2,7 @@ package com.fintech.fintech_platform.domain.account;
 
 
 import com.fintech.fintech_platform.domain.account.dto.AccountCreateRequest;
+import com.fintech.fintech_platform.domain.account.dto.DepositRequest;
 import com.fintech.fintech_platform.domain.account.dto.WithdrawRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,14 @@ public class AccountController {
     @PostMapping("/withdraw")
     public ResponseEntity<String> withdraw(@RequestBody WithdrawRequest request, Principal principal) {
         String result = accountService.withdraw(principal.getName(), request.getAmount());
+        return ResponseEntity.ok(result);
+    }
+
+    // 입금
+    @PostMapping("/deposit")
+    public ResponseEntity<String> deposit(@RequestBody DepositRequest request,
+                                          Principal principal) {
+        String result = accountService.deposit(principal.getName(), request.getAmount());
         return ResponseEntity.ok(result);
     }
 
