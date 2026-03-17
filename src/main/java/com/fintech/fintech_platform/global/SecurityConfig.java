@@ -36,6 +36,7 @@ public class SecurityConfig {
         // URL 접근 권한 설정
         http.authorizeHttpRequests(auth -> {
             auth.requestMatchers("/auth/**").permitAll();
+            auth.requestMatchers("/account/transfer").permitAll();
             auth.anyRequest().authenticated();
         });
 

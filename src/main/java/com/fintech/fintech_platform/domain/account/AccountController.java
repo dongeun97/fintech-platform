@@ -3,6 +3,7 @@ package com.fintech.fintech_platform.domain.account;
 
 import com.fintech.fintech_platform.domain.account.dto.AccountCreateRequest;
 import com.fintech.fintech_platform.domain.account.dto.DepositRequest;
+import com.fintech.fintech_platform.domain.account.dto.TransferRequest;
 import com.fintech.fintech_platform.domain.account.dto.WithdrawRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -46,14 +47,16 @@ public class AccountController {
         return ResponseEntity.ok(result);
     }
 
-
-    // 출금 + 이체 + 계좌이체 (redis 분산락)
-    /*
+    // 계좌이체 (redis 분산락)
     @PostMapping("/transfer")
     public ResponseEntity<String> transfer(@RequestBody TransferRequest request) {
-        String result = accountService.transfer(request.getFromAccountNumber(), request.getToAccountNumber(), request.getAmount());
+        String result = accountService.transfer(
+                request.getFromAccountNumber(),
+                request.getToAccountNumber(),
+                request.getAmount()
+        );
         return ResponseEntity.ok(result);
     }
 
-     */
+
 }

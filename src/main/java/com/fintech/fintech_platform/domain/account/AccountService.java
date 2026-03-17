@@ -99,5 +99,48 @@ public class AccountService {
         return "입금 완료! 잔액: " + account.getBalance() + "원";
     }
 
+    @Transactional
+    public String transfer(String fromAccountNumber, String toAccountNumber, Long amount) {
+
+        // Redis 분산락 키
+        String lockKey = "lock:account:" + fromAccountNumber;
+
+        // 분산락 획득 시도 (5초 후 자동 해제)
+        Boolean locked = redisTemplate.opsForValue().setIfAbsent(lockKey, "lock", 5, TimeUnit.SECONDS);
+
+        if (!Boolean.TRUE.equals(locked)) {
+            throw new IllegalStateException("현재 이체가 진행 중입니다. 잠시 후 다시 시도해주세요.");
+        }
+
+        try {
+            // 보내는 계좌 조회
+            Account fromAccount = accountRepository.findByAccountNumber(fromAccountNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("출금 계좌가 존재하지 않습니다."));
+
+            // 받는 계좌 조회
+            Account toAccount = accountRepository.findByAccountNumber(toAccountNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("입금 계좌가 존재하지 않습니다."));
+
+            // 잔액 부족 체크
+            if (fromAccount.getBalance() == 0) {
+                throw new IllegalArgumentException("계좌에 잔액이 없습니다.");
+            } else if (fromAccount.getBalance() < amount) {
+                throw new IllegalArgumentException("잔액이 부족합니다. 현재 잔액: " + fromAccount.getBalance() + "원");
+            }
+
+            // 출금 처리
+            fromAccount.setBalance(fromAccount.getBalance() - amount);
+
+            // 입금 처리
+            toAccount.setBalance(toAccount.getBalance() + amount);
+
+            return "이체 완료! 잔액: " + fromAccount.getBalance() + "원";
+
+        } finally {
+            // 분산락 해제 (무조건 해제!)
+            redisTemplate.delete(lockKey);
+        }
+    }
+
 
 }
