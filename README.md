@@ -67,3 +67,87 @@
 
 ### 1. 저장소 클론
 ```bash
+git clone https://github.com/dongeun97/fintech-platform.git
+cd fintech-platform
+```
+
+### 2. 인프라 실행 (MySQL + Redis)
+```bash
+docker-compose up -d
+```
+
+### 3. 애플리케이션 실행
+```bash
+./gradlew bootRun
+```
+
+### 4. API 확인
+```
+http://localhost:8080
+```
+
+---
+
+## 📂 프로젝트 구조
+```
+src/main/java/com/fintech/
+├── domain/
+│   ├── account/       # 계좌 API (동시성 제어)
+│   │   └── dto/       # 요청/응답 DTO
+│   ├── batch/         # 일별 정산 Spring Batch
+│   └── auth/          # JWT 인증
+│       └── dto/       # 요청/응답 DTO
+├── global/
+│   ├── exception/     # 공통 예외 처리
+│   └── lock/          # Redis 분산락
+```
+
+---
+
+## 📋 주요 기능
+
+### 1. 회원가입 / 로그인
+- BCrypt 비밀번호 암호화
+- JWT Access Token 발급
+- Spring Security 필터 체인 적용
+
+### 2. 계좌 API
+- 계좌 생성 (계좌번호 자동 생성)
+- 잔액 조회
+- 출금 (1일 출금 한도 500만원 제한 - Redis 활용)
+- 입금
+
+### 3. 계좌이체 API
+- Redis 분산락을 활용한 동시성 제어
+- 트랜잭션 처리로 데이터 정합성 보장
+- 잔액 부족, 계좌 없음 등 예외 처리
+- 동시성 테스트 (JUnit + ExecutorService)
+
+### 4. 일별 정산 배치 (구현 예정)
+- Spring Batch Chunk 방식으로 대용량 처리
+- 매일 자정 스케줄링 실행
+- 거래 내역 집계 및 정산 결과 저장
+
+---
+
+## 🔒 동시성 제어 시나리오
+
+급여일에 회사 계좌에서 수백 명의 직원한테 동시에 급여를 이체하는 상황처럼
+같은 계좌에서 동시에 여러 출금 요청이 발생할 수 있습니다.
+
+Redis 분산락을 활용하여 이 문제를 해결했습니다.
+```
+동시에 10개 요청
+→ 1개만 락 획득 → 이체 성공
+→ 9개는 락 획득 실패 → 즉시 에러 반환
+→ 잔액 정합성 보장!
+```
+
+---
+
+## 🧪 테스트
+
+### 동시성 테스트
+- ExecutorService로 10개 스레드 동시 이체 요청
+- CountDownLatch로 모든 스레드 완료 대기
+- 이체 전후 잔액 합계 동일 여부 검증
